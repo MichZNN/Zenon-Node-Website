@@ -1,0 +1,89 @@
+name: Deploy website
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never run two deploys at the same time.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Validate deployment settings
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_PATH" ]; then
+            echo "DEPLOY_HOST, DEPLOY_USER and DEPLOY_PATH must be configured." >&2
+            exit 1
+          fi
+          if [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be configured." >&2
+            exit 1
+          fi
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          install -d -m 700 "$RUNNER_TEMP/deploy-ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/deploy-ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/deploy-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/deploy-ssh/id_ed25519"
+          echo "DEPLOY_SSH_DIR=$RUNNER_TEMP/deploy-ssh" >> "$GITHUB_ENV"
+
+      - name: Upload and switch to the new version
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        shell: bash
+        run: |
+          deploy_port="${DEPLOY_PORT:-22}"
+          # Pack the site (repo root = web root), without repo-only files.
+          tar --exclude='./.git' --exclude='./.github' \
+              --exclude='./README.md' --exclude='./.gitignore' \
+              --exclude='./LICENSE' \
+              -czf "$RUNNER_TEMP/site.tar.gz" -C "$GITHUB_WORKSPACE" .
+          # Unpack next to it, then swap directories so visitors never see a
+          # half-uploaded site and removed files disappear from the server.
+          ssh \
+            -p "$deploy_port" \
+            -i "$DEPLOY_SSH_DIR/id_ed25519" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$DEPLOY_SSH_DIR/known_hosts" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "set -e
+             target='$DEPLOY_PATH'
+             rm -rf \"\$target.new\" \"\$target.old\"
+             mkdir -p \"\$target.new\"
+             tar -xzf - -C \"\$target.new\"
+             chmod -R u=rwX,go=rX \"\$target.new\"
+             if [ -d \"\$target\" ]; then mv \"\$target\" \"\$target.old\"; fi
+             mv \"\$target.new\" \"\$target\"
+             rm -rf \"\$target.old\"
+             echo \"Deployed to \$target\"" \
+            < "$RUNNER_TEMP/site.tar.gz"
