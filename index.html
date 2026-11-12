@@ -23,12 +23,17 @@
   h1 { margin: 14px 0 10px; font-size: clamp(30px, 6vw, 46px); line-height: 1.1; letter-spacing: -.01em; }
   .lead { margin: 0 0 32px; color: var(--muted); max-width: 36em; }
 
+  /* Mobile: one item per line. Wider screens: all on one line. */
   .status {
-    display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: center;
+    display: flex; flex-direction: column; gap: 8px;
     padding: 16px 20px; margin-bottom: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
     font-family: var(--mono); font-size: 14px;
   }
-  .status .label { color: var(--muted); margin-right: 8px; }
+  .status .label { display: inline-block; min-width: 4.5em; color: var(--muted); margin-right: 8px; }
+  @media (min-width: 560px) {
+    .status { flex-direction: row; align-items: center; gap: 28px; }
+    .status .label { min-width: 0; }
+  }
   .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--muted); margin-right: 8px; vertical-align: 1px; }
   .dot.ok { background: var(--accent); box-shadow: 0 0 0 4px rgba(111,243,77,.15); }
   .dot.sync { background: var(--warn); }
@@ -39,9 +44,12 @@
   .row {
     display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden;
   }
+  /* Always one line: what does not fit fades out behind the Copy button. */
   .row code {
-    flex: 1; min-width: 0; padding: 15px 16px; font: clamp(13px, 3.6vw, 15px)/1.4 var(--mono); color: var(--aqua);
-    overflow-wrap: normal;
+    flex: 1; min-width: 0; padding: 15px 16px; font: 15px/1.4 var(--mono); color: var(--aqua);
+    white-space: nowrap; overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
   }
   .copy {
     flex: 0 0 auto; min-width: 76px; border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--text);
@@ -54,8 +62,17 @@
   details { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; }
   summary { cursor: pointer; color: var(--muted); font-weight: 500; }
   summary:hover { color: var(--text); }
+  .codebox { position: relative; margin-top: 14px; }
+  .codebox .copy-sm {
+    position: absolute; top: 8px; right: 8px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--muted); font: 600 12px/1 system-ui, sans-serif; cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .codebox .copy-sm:hover { color: var(--text); border-color: #2C3A39; }
+  .codebox .copy-sm:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .codebox .copy-sm.done { color: var(--accent); }
   pre {
-    margin: 14px 0 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+    margin: 0; padding: 16px; padding-top: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
     font: 13px/1.55 var(--mono); color: var(--text); overflow-x: auto;
   }
   footer { padding: 24px 20px 32px; text-align: center; color: var(--muted); font-size: 14px; }
@@ -78,7 +95,7 @@
   <div class="endpoint">
     <h2>HTTP RPC</h2>
     <div class="row">
-      <code id="http">https://node.zenon.nom.co<wbr>:35997</code>
+      <code id="http">https://node.zenon.nom.co:35997</code>
       <button class="copy" data-target="http" type="button">Copy</button>
     </div>
   </div>
@@ -86,16 +103,19 @@
   <div class="endpoint">
     <h2>WebSocket</h2>
     <div class="row">
-      <code id="ws">wss://node.zenon.nom.co<wbr>:35998</code>
+      <code id="ws">wss://node.zenon.nom.co:35998</code>
       <button class="copy" data-target="ws" type="button">Copy</button>
     </div>
   </div>
 
   <details>
     <summary>Quick test with curl</summary>
-<pre>curl -s https://node.zenon.nom.co:35997 \
+    <div class="codebox">
+      <button class="copy-sm" data-target="curl" type="button">Copy</button>
+<pre id="curl">curl -s https://node.zenon.nom.co:35997 \
   -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"stats.syncInfo","params":[]}'</pre>
+    </div>
   </details>
 </main>
 
@@ -105,7 +125,7 @@
 
 <script>
   // Copy buttons
-  document.querySelectorAll('.copy').forEach(function (btn) {
+  document.querySelectorAll('.copy, .copy-sm').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var text = document.getElementById(btn.dataset.target).textContent.trim();
       var done = function () {
