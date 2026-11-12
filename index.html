@@ -6,62 +6,11 @@
 <title>Zenon Public Node — node.zenon.nom.co</title>
 <meta name="description" content="Public Zenon Network of Momentum RPC node. HTTP and WebSocket endpoints.">
 <meta name="theme-color" content="#0A0D0F">
-<style>
-  :root {
-    --bg: #0A0D0F; --surface: #11161A; --line: #1E272C; --text: #E8EDEA;
-    --muted: #94A19B; --accent: #6FF34D; --aqua: #5CE1E6; --warn: #F2C94C; --bad: #FF6B6B;
-    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
-    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
-    display: flex; flex-direction: column;
-  }
-  main { width: 100%; max-width: 760px; margin: 0 auto; padding: clamp(32px, 8vw, 88px) 20px 40px; flex: 1; }
-  .eyebrow { font: 500 13px/1 var(--mono); letter-spacing: .12em; color: var(--accent); }
-  h1 { margin: 14px 0 10px; font-size: clamp(30px, 6vw, 46px); line-height: 1.1; letter-spacing: -.01em; }
-  .lead { margin: 0 0 32px; color: var(--muted); max-width: 36em; }
-
-  .status {
-    display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: center;
-    padding: 16px 20px; margin-bottom: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
-    font-family: var(--mono); font-size: 14px;
-  }
-  .status .label { color: var(--muted); margin-right: 8px; }
-  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--muted); margin-right: 8px; vertical-align: 1px; }
-  .dot.ok { background: var(--accent); box-shadow: 0 0 0 4px rgba(111,243,77,.15); }
-  .dot.sync { background: var(--warn); }
-  .dot.bad { background: var(--bad); }
-
-  .endpoint { margin-bottom: 18px; }
-  .endpoint h2 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .row {
-    display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden;
-  }
-  .row code {
-    flex: 1; min-width: 0; padding: 15px 16px; font: clamp(13px, 3.6vw, 15px)/1.4 var(--mono); color: var(--aqua);
-    overflow-wrap: normal;
-  }
-  .copy {
-    flex: 0 0 auto; min-width: 76px; border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--text);
-    font: 600 14px/1 system-ui, sans-serif; cursor: pointer; padding: 0 14px; transition: background .15s, color .15s;
-  }
-  .copy:hover { background: #172025; }
-  .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .copy.done { color: var(--accent); }
-
-  details { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 20px; }
-  summary { cursor: pointer; color: var(--muted); font-weight: 500; }
-  summary:hover { color: var(--text); }
-  pre {
-    margin: 14px 0 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
-    font: 13px/1.55 var(--mono); color: var(--text); overflow-x: auto;
-  }
-  footer { padding: 24px 20px 32px; text-align: center; color: var(--muted); font-size: 14px; }
-  footer a { color: var(--muted); }
-  footer a:hover { color: var(--text); }
-</style>
+<link rel="icon" href="/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="manifest" href="/img/site.webmanifest">
+<link rel="stylesheet" href="/css/style.css?v=1">
 </head>
 <body>
 <main>
@@ -73,12 +22,13 @@
     <span><span class="dot" id="dot"></span><span id="state">Checking…</span></span>
     <span><span class="label">Height</span><span id="height">—</span></span>
     <span><span class="label">Peers</span><span id="peers">—</span></span>
+    <span><span class="label">Version</span><span id="version">—</span></span>
   </div>
 
   <div class="endpoint">
     <h2>HTTP RPC</h2>
     <div class="row">
-      <code id="http">https://node.zenon.nom.co<wbr>:35997</code>
+      <code id="http">https://node.zenon.nom.co:35997</code>
       <button class="copy" data-target="http" type="button">Copy</button>
     </div>
   </div>
@@ -86,16 +36,19 @@
   <div class="endpoint">
     <h2>WebSocket</h2>
     <div class="row">
-      <code id="ws">wss://node.zenon.nom.co<wbr>:35998</code>
+      <code id="ws">wss://node.zenon.nom.co:35998</code>
       <button class="copy" data-target="ws" type="button">Copy</button>
     </div>
   </div>
 
   <details>
     <summary>Quick test with curl</summary>
-<pre>curl -s https://node.zenon.nom.co:35997 \
+    <div class="codebox">
+      <button class="copy-sm" data-target="curl" type="button">Copy</button>
+<pre id="curl">curl -s https://node.zenon.nom.co:35997 \
   -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"stats.syncInfo","params":[]}'</pre>
+    </div>
   </details>
 </main>
 
@@ -103,54 +56,6 @@
   <a href="https://zenon.network" rel="noopener">zenon.network</a>
 </footer>
 
-<script>
-  // Copy buttons
-  document.querySelectorAll('.copy').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var text = document.getElementById(btn.dataset.target).textContent.trim();
-      var done = function () {
-        btn.textContent = 'Copied'; btn.classList.add('done');
-        setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1600);
-      };
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(done, fallback);
-      } else { fallback(); }
-      function fallback() {
-        var ta = document.createElement('textarea');
-        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); done(); } catch (e) {}
-        document.body.removeChild(ta);
-      }
-    });
-  });
-
-  // Live status from the node itself
-  var RPC = 'https://node.zenon.nom.co:35997';
-  function call(method) {
-    var ctrl = new AbortController();
-    var t = setTimeout(function () { ctrl.abort(); }, 15000);
-    return fetch(RPC, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctrl.signal,
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: method, params: [] })
-    }).then(function (r) { clearTimeout(t); return r.json(); }).then(function (j) { return j.result; });
-  }
-  function setState(cls, text) {
-    document.getElementById('dot').className = 'dot ' + cls;
-    document.getElementById('state').textContent = text;
-  }
-  function refresh() {
-    call('stats.syncInfo').then(function (s) {
-      if (s.state === 2) setState('ok', 'Synced');
-      else setState('sync', 'Syncing');
-      document.getElementById('height').textContent = Number(s.currentHeight).toLocaleString('en-US');
-    }).catch(function () { setState('bad', 'Not responding'); });
-    call('stats.networkInfo').then(function (n) {
-      document.getElementById('peers').textContent = n.numPeers;
-    }).catch(function () {});
-  }
-  refresh();
-  setInterval(refresh, 20000);
-</script>
+<script src="/js/main.js?v=1" defer></script>
 </body>
 </html>
