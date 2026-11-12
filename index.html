@@ -90,6 +90,7 @@
     <span><span class="dot" id="dot"></span><span id="state">Checking…</span></span>
     <span><span class="label">Height</span><span id="height">—</span></span>
     <span><span class="label">Peers</span><span id="peers">—</span></span>
+    <span><span class="label">Version</span><span id="version">—</span></span>
   </div>
 
   <div class="endpoint">
@@ -167,6 +168,9 @@
     }).catch(function () { setState('bad', 'Not responding'); });
     call('stats.networkInfo').then(function (n) {
       document.getElementById('peers').textContent = n.numPeers;
+    }).catch(function () {});
+    call('stats.processInfo').then(function (p) {
+      document.getElementById('version').textContent = 'go-zenon ' + p.version;
     }).catch(function () {});
   }
   refresh();
