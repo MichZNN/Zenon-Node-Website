@@ -67,6 +67,16 @@ pre {
   margin: 0; padding: 16px; padding-top: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
   font: 13px/1.55 var(--mono); color: var(--text); overflow-x: auto;
 }
+.history { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 22px; }
+.history h2 { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.history-note { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.history-list { list-style: none; margin: 0; padding: 0; font: 13px/1.5 var(--mono); }
+.history-list li { display: flex; gap: 10px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.history-list li:last-child { border-bottom: 0; }
+.history-list .when { color: var(--text); }
+.history-list .what { color: var(--muted); white-space: nowrap; }
+.history-list .dot { flex: 0 0 auto; margin: 0; vertical-align: 0; }
+
 footer { padding: 24px 20px 32px; text-align: center; color: var(--muted); font-size: 14px; }
 footer a { color: var(--muted); }
 footer a:hover { color: var(--text); }
