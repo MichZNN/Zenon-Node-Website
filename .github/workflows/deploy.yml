@@ -65,7 +65,7 @@ jobs:
           # Pack the site (repo root = web root), without repo-only files.
           tar --exclude='./.git' --exclude='./.github' \
               --exclude='./README.md' --exclude='./.gitignore' \
-              --exclude='./LICENSE' \
+              --exclude='./LICENSE' --exclude='./tools' \
               -czf "$RUNNER_TEMP/site.tar.gz" -C "$GITHUB_WORKSPACE" .
           # Unpack next to it, then swap directories so visitors never see a
           # half-uploaded site and removed files disappear from the server.
@@ -87,3 +87,29 @@ jobs:
              rm -rf \"\$target.old\"
              echo \"Deployed to \$target\"" \
             < "$RUNNER_TEMP/site.tar.gz"
+
+      - name: Install server tools
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        shell: bash
+        run: |
+          # tools/ is not part of the website: it goes to bin/ next to the
+          # web root, where cron runs it.
+          ssh \
+            -p "${DEPLOY_PORT:-22}" \
+            -i "$DEPLOY_SSH_DIR/id_ed25519" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$DEPLOY_SSH_DIR/known_hosts" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "set -e
+             bin=\"\$(dirname '$DEPLOY_PATH')/bin\"
+             mkdir -p \"\$bin\"
+             cat > \"\$bin/sync-history.py.new\"
+             chmod 755 \"\$bin/sync-history.py.new\"
+             mv \"\$bin/sync-history.py.new\" \"\$bin/sync-history.py\"
+             echo \"Installed \$bin/sync-history.py\"" \
+            < "$GITHUB_WORKSPACE/tools/sync-history.py"
