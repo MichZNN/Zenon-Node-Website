@@ -10,7 +10,7 @@
 <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="manifest" href="/img/site.webmanifest">
-<link rel="stylesheet" href="/css/style.css?v=1">
+<link rel="stylesheet" href="/css/style.css?v=2">
 </head>
 <body>
 <main>
@@ -50,12 +50,18 @@
   -d '{"jsonrpc":"2.0","id":1,"method":"stats.syncInfo","params":[]}'</pre>
     </div>
   </details>
+
+  <section class="history" aria-labelledby="history-title">
+    <h2 id="history-title">Sync history</h2>
+    <p class="history-note" id="history-note">Loading…</p>
+    <ul class="history-list" id="history"></ul>
+  </section>
 </main>
 
 <footer>
   <a href="https://zenon.network" rel="noopener">zenon.network</a>
 </footer>
 
-<script src="/js/main.js?v=1" defer></script>
+<script src="/js/main.js?v=2" defer></script>
 </body>
 </html>
